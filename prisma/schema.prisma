@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Collection {
+  id Int @id @default(autoincrement())
+  userId Int
+  name String
+  genres Genre[]
+  volumes Volume[]
+}
+
+model Genre {
+  id Int @id @default(autoincrement())
+  name String
+  collections Collection[]
+}
+
+model Volume {
+  id Int @id @default(autoincrement())
+  collection Collection @relation(fields: [collectionId], references: [id])
+  collectionId Int
+  userId Int
+  name String
+  state VolumeState @default(RELEASED)
+}
+
+enum VolumeState {
+  RELEASED
+  BOUGHT
+  READING
+  FINISHED
+  LOST
+}

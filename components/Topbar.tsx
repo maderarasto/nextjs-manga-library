@@ -2,6 +2,7 @@ import React from 'react';
 import {SidebarTrigger} from "@/components/ui/sidebar";
 import {Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbSeparator} from "@/components/ui/breadcrumb";
 import {UserButton} from "@clerk/nextjs";
+import DarkModeToggle from "@/components/DarkModeToggle";
 
 const Topbar = () => {
   return (
@@ -21,6 +22,7 @@ const Topbar = () => {
         </Breadcrumb>
       </div>
       <div className="flex items-center gap-2">
+        <DarkModeToggle />
         <UserButton />
       </div>
     </nav>
