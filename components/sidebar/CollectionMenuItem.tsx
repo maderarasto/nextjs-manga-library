@@ -7,12 +7,16 @@ import {clsx} from "clsx";
 export type CollectionMenuItemProps = {
   label: string
   children?: React.ReactNode
+  onClick?: () => void
+  active?: boolean
   open?: boolean
 }
 
 const CollectionMenuItem = ({
   label,
   children,
+  onClick,
+  active = false,
   open = false,
 }: CollectionMenuItemProps) => {
   const [isOpen, setIsOpen] = React.useState(open);
@@ -22,8 +26,13 @@ const CollectionMenuItem = ({
   }
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} onDoubleClick={() => toggleCollapsible()}>
-      <SidebarMenuButton>
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      onClick={onClick}
+      onDoubleClick={() => toggleCollapsible()}
+    >
+      <SidebarMenuButton isActive={active}>
         <div className="flex flex-1 flex-row gap-3 cursor-pointer">
           <div className="flex flex-1 items-center gap-3">
             <SquareLibrary size={20} />
@@ -45,7 +54,7 @@ const CollectionMenuItem = ({
             {children}
           </SidebarMenuSub>
         ) : (
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center items-center py-1">
             <span className="text-gray-500">No volumes yet</span>
           </div>
         )}

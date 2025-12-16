@@ -1,19 +1,21 @@
-import LeftPanel from "@/components/sidebar/LeftPanel";
-import {SidebarProvider} from "@/components/ui/sidebar";
-import Topbar from "@/components/Topbar";
-import {Toaster} from "sonner";
+import {currentUser} from "@clerk/nextjs/server";
+import prisma from "@/lib/prisma";
+import MangaLibrary from "@/components/MangaLibrary";
 
-export default function Home() {
+export default async function Home() {
+  const user = await currentUser();
+
+  if (!user) {
+    return null;
+  }
+
+  const collections = await prisma.collection.findMany({
+    where: {
+      userId: user.id
+    }
+  });
+
   return (
-    <SidebarProvider>
-      <LeftPanel />
-      <main className="w-full">
-        <Topbar />
-        <div className="p-4">
-          <h1>Hello</h1>
-        </div>
-      </main>
-      <Toaster />
-    </SidebarProvider>
+    <MangaLibrary collections={collections} />
   );
 }

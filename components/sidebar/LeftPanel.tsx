@@ -17,14 +17,33 @@ import VolumeMenuItem from "@/components/sidebar/VolumeMenuItem";
 import {InputGroup, InputGroupAddon, InputGroupInput} from "@/components/ui/input-group";
 import React from "react";
 import {toast} from "sonner";
+import {Collection} from "@/generated/prisma/client";
 
-const LeftPanel = () => {
+export type LeftPanelProps = {
+  collections: Collection[]
+  selectedCollection: Collection | null
+  onSelectedCollection?: (collection: Collection) => void
+}
+
+const LeftPanel = ({
+  collections,
+  selectedCollection,
+  onSelectedCollection,
+}: LeftPanelProps) => {
   const {open: isOpen} = useSidebar();
 
   const handleAddCollection = () => {
     toast.info("It should open dialog for new collection", {
       position: 'top-center'
     });
+  }
+
+  const selectCollection = (collection: Collection) => {
+    if (!onSelectedCollection) {
+      return;
+    }
+
+    onSelectedCollection(collection);
   }
 
   return (
@@ -59,47 +78,16 @@ const LeftPanel = () => {
                   <span>New Collection</span>
                 </div>
               </SidebarMenuButton>
-              <CollectionMenuItem label="One Piece">
-                <VolumeMenuItem label="Volume 1" />
-                <VolumeMenuItem label="Volume 2" />
-                <VolumeMenuItem label="Volume 3" />
-                <VolumeMenuItem label="Volume 4" />
-                <VolumeMenuItem label="Volume 5" />
-                <VolumeMenuItem label="Volume 1" />
-                <VolumeMenuItem label="Volume 2" />
-                <VolumeMenuItem label="Volume 3" />
-                <VolumeMenuItem label="Volume 4" />
-                <VolumeMenuItem label="Volume 5" />
-                <VolumeMenuItem label="Volume 1" />
-                <VolumeMenuItem label="Volume 2" />
-                <VolumeMenuItem label="Volume 3" />
-                <VolumeMenuItem label="Volume 4" />
-                <VolumeMenuItem label="Volume 5" />
-              </CollectionMenuItem>
-              <CollectionMenuItem label="One Piece">
-                <VolumeMenuItem label="Volume 1" />
-                <VolumeMenuItem label="Volume 2" />
-                <VolumeMenuItem label="Volume 3" />
-                <VolumeMenuItem label="Volume 4" />
-                <VolumeMenuItem label="Volume 5" />
-                <VolumeMenuItem label="Volume 1" />
-                <VolumeMenuItem label="Volume 2" />
-                <VolumeMenuItem label="Volume 3" />
-                <VolumeMenuItem label="Volume 4" />
-                <VolumeMenuItem label="Volume 5" />
-                <VolumeMenuItem label="Volume 1" />
-                <VolumeMenuItem label="Volume 2" />
-                <VolumeMenuItem label="Volume 3" />
-                <VolumeMenuItem label="Volume 4" />
-                <VolumeMenuItem label="Volume 5" />
-              </CollectionMenuItem>
-              <CollectionMenuItem label="One Piece">
-                <VolumeMenuItem label="Volume 1" />
-                <VolumeMenuItem label="Volume 2" />
-                <VolumeMenuItem label="Volume 3" />
-                <VolumeMenuItem label="Volume 4" />
-                <VolumeMenuItem label="Volume 5" />
-              </CollectionMenuItem>
+            </SidebarMenu>
+            <SidebarMenu>
+              {collections.map((collection) => (
+                <CollectionMenuItem
+                  key={`${collection.name}-${collection.id}`}
+                  label={collection.name}
+                  onClick={() => selectCollection(collection)}
+                  active={selectedCollection?.id === collection.id}
+                />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
