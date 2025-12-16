@@ -12,6 +12,9 @@ export default async function Home() {
   const collections = await prisma.collection.findMany({
     where: {
       userId: user.id
+    },
+    include: {
+      volumes: true
     }
   });
 

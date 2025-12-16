@@ -49,8 +49,8 @@ const CollectionMenuItem = ({
         </div>
       </SidebarMenuButton>
       <CollapsibleContent>
-        {children ? (
-          <SidebarMenuSub>
+        {Array.isArray(children) && children.length > 0 ? (
+          <SidebarMenuSub className="mr-0 pr-0">
             {children}
           </SidebarMenuSub>
         ) : (

@@ -13,22 +13,27 @@ import {
 import Image from "next/image";
 import {Plus, Search} from "lucide-react";
 import CollectionMenuItem from "@/components/sidebar/CollectionMenuItem";
-import VolumeMenuItem from "@/components/sidebar/VolumeMenuItem";
 import {InputGroup, InputGroupAddon, InputGroupInput} from "@/components/ui/input-group";
 import React from "react";
 import {toast} from "sonner";
-import {Collection} from "@/generated/prisma/client";
+import {Volume} from "@/generated/prisma/client";
+import {CollectionWithVolumes} from "@/lib/types";
+import VolumeMenuItem from "@/components/sidebar/VolumeMenuItem";
 
 export type LeftPanelProps = {
-  collections: Collection[]
-  selectedCollection: Collection | null
-  onSelectedCollection?: (collection: Collection) => void
+  collections: CollectionWithVolumes[]
+  selectedCollection?: CollectionWithVolumes | null
+  selectedVolume?: Volume | null
+  onSelectedCollection?: (collection: CollectionWithVolumes) => void
+  onSelectedVolume?: (volume: Volume) => void
 }
 
 const LeftPanel = ({
   collections,
   selectedCollection,
+  selectedVolume,
   onSelectedCollection,
+  onSelectedVolume,
 }: LeftPanelProps) => {
   const {open: isOpen} = useSidebar();
 
@@ -38,12 +43,20 @@ const LeftPanel = ({
     });
   }
 
-  const selectCollection = (collection: Collection) => {
+  const selectCollection = (collection: CollectionWithVolumes) => {
     if (!onSelectedCollection) {
       return;
     }
 
     onSelectedCollection(collection);
+  }
+
+  const selectVolume = (volume: Volume) => {
+    if (!onSelectedVolume) {
+      return;
+    }
+
+    onSelectedVolume(volume);
   }
 
   return (
@@ -86,7 +99,16 @@ const LeftPanel = ({
                   label={collection.name}
                   onClick={() => selectCollection(collection)}
                   active={selectedCollection?.id === collection.id}
-                />
+                >
+                  {collection.volumes.map((volume) => (
+                    <VolumeMenuItem
+                      key={volume.name}
+                      label={volume.name}
+                      active={selectedVolume?.id === volume.id}
+                      onClick={() => selectVolume(volume)}
+                    />
+                  ))}
+                </CollectionMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
