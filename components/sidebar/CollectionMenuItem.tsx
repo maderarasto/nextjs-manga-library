@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@/components/ui/collapsible";
 import {ChevronRight, SquareLibrary} from "lucide-react";
-import {SidebarMenuButton, SidebarMenuSub} from "@/components/ui/sidebar";
+import {SidebarMenuButton, SidebarMenuSub, useSidebar} from "@/components/ui/sidebar";
 import {clsx} from "clsx";
 
 export type CollectionMenuItemProps = {
@@ -9,7 +9,7 @@ export type CollectionMenuItemProps = {
   children?: React.ReactNode
   onClick?: () => void
   active?: boolean
-  open?: boolean
+  collapsed?: boolean
 }
 
 const CollectionMenuItem = ({
@@ -17,18 +17,19 @@ const CollectionMenuItem = ({
   children,
   onClick,
   active = false,
-  open = false,
+  collapsed = true,
 }: CollectionMenuItemProps) => {
-  const [isOpen, setIsOpen] = React.useState(open);
+  const [isCollapsed, setIsCollapsed] = useState(collapsed);
+  const {open} = useSidebar();
 
   const toggleCollapsible = () => {
-    setIsOpen((oldIsOpen) => !oldIsOpen);
+    setIsCollapsed((oldIsCollapsed) => !oldIsCollapsed);
   }
 
   return (
     <Collapsible
-      open={isOpen}
-      onOpenChange={setIsOpen}
+      open={!isCollapsed}
+      onOpenChange={(open) => setIsCollapsed(!open)}
       onClick={onClick}
       onDoubleClick={() => toggleCollapsible()}
     >
@@ -43,7 +44,7 @@ const CollectionMenuItem = ({
               size={20}
               className={clsx(
                 'transition-transform duration-500',
-                isOpen ? 'rotate-90' : 'rotate-0')}
+                isCollapsed ? 'rotate-0' : 'rotate-90')}
             />
           </CollapsibleTrigger>
         </div>
@@ -53,11 +54,11 @@ const CollectionMenuItem = ({
           <SidebarMenuSub className="mr-0 pr-0">
             {children}
           </SidebarMenuSub>
-        ) : (
+        ) : open ? (
           <div className="flex justify-center items-center py-1">
             <span className="text-gray-500">No volumes yet</span>
           </div>
-        )}
+        ) : ''}
       </CollapsibleContent>
     </Collapsible>
   );
