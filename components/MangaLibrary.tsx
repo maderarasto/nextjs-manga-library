@@ -18,16 +18,50 @@ const MangaLibrary = ({
 }: MangaLibraryProps) => {
   const [activeCollection, setActiveCollection] = useState<CollectionWithVolumes | null>(null);
   const [activeVolume, setActiveVolume] = useState<Volume | null>(null);
+  const [selectedVolumes, setSelectedVolumes] = useState<number[]>([]);
+  const [isControlDown, setIsControlDown] = useState<boolean>(false);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      setIsControlDown(event.key === 'Control');
+    };
+
+    const onKeyReleased = () => {
+      setIsControlDown(false);
+    }
+
+    const onDocumentClick = (ev: MouseEvent) => {
+      if ((ev.target as HTMLElement).closest('.volume-card-wrapper')) {
+        return;
+      }
+
+      setSelectedVolumes([]);
+    }
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyReleased);
+    document.addEventListener("click", onDocumentClick);
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyReleased);
+      document.removeEventListener("click", onDocumentClick);
+    }
+  }, []);
 
   useEffect(() => {
     const clearVolume = () => {
       setActiveVolume(null);
     }
 
-    if (activeCollection?.id !== activeVolume?.collectionId) {
+    if (!activeCollection || !activeVolume) {
+      return;
+    }
+
+    if (activeCollection.id !== activeVolume.collectionId) {
       clearVolume();
     }
-  }, [activeCollection?.id, activeVolume?.collectionId]);
+  }, [activeCollection, activeVolume]);
 
   const visibleVolumes = useMemo(() => {
     return collections.flatMap((collection) => {
@@ -44,7 +78,29 @@ const MangaLibrary = ({
   }
 
   const handleCollectionChanged = (collection: CollectionWithVolumes|null) => {
+    setSelectedVolumes([]);
     setActiveCollection(collection);
+  }
+
+  const handleVolumePick = (volume: Volume) => {
+    if (!isControlDown) {
+      setActiveVolume(volume);
+      return;
+    }
+
+    setSelectedVolumes((prevVolumes) => {
+      const foundVolumeId = prevVolumes.find((volumeId) => {
+        return volumeId === volume.id;
+      });
+
+      if (!foundVolumeId) {
+        return [...prevVolumes, volume.id];
+      }
+
+      return prevVolumes.filter((volumeId) => {
+        return volumeId !== volume.id;
+      });
+    })
   }
 
   return (
@@ -63,7 +119,13 @@ const MangaLibrary = ({
         />
         <div className="flex flex-wrap flex-1 gap-4 p-4">
           {visibleVolumes.map((volume) => (
-            <VolumeCard key={volume.name} volume={volume} />
+            <VolumeCard
+              key={volume.name}
+              volume={volume}
+              onPick={handleVolumePick}
+              selected={selectedVolumes.includes(volume.id)}
+              active={volume.id === activeVolume?.id}
+            />
           ))}
         </div>
       </main>

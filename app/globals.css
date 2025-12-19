@@ -122,4 +122,12 @@
   body {
     @apply bg-background text-foreground;
   }
+
+    .volume-card-wrapper {
+        @apply relative w-40 h-60 cursor-pointer transition-transform hover:scale-105 hover:shadow-lg;
+    }
+
+    .volume-card {
+        @apply flex flex-col items-center h-full px-4 py-8 border rounded-xs bg-slate-200 dark:bg-slate-600;
+    }
 }
