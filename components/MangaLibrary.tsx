@@ -1,13 +1,14 @@
 'use client';
 
-import React, {useEffect, useMemo, useState} from 'react';
-import LeftPanel from "@/components/sidebar/LeftPanel";
+import React, {useEffect, useMemo, useRef, useState} from 'react';
+import LeftPanel from "@/components/panels/LeftPanel";
 import Topbar from "@/components/Topbar";
 import {Toaster} from "sonner";
 import {SidebarProvider} from "@/components/ui/sidebar";
 import {Volume} from "@/generated/prisma/client";
 import {CollectionWithVolumes} from "@/lib/types";
 import VolumeCard from "@/components/VolumeCard";
+import RightPanel, {RightPanelMethods} from "@/components/panels/RightPanel";
 
 export type MangaLibraryProps = {
   collections: CollectionWithVolumes[];
@@ -21,6 +22,8 @@ const MangaLibrary = ({
   const [selectedVolumes, setSelectedVolumes] = useState<number[]>([]);
   const [isControlDown, setIsControlDown] = useState<boolean>(false);
 
+  const rightPanelRef = useRef<RightPanelMethods>(null);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       setIsControlDown(event.key === 'Control');
@@ -31,7 +34,10 @@ const MangaLibrary = ({
     }
 
     const onDocumentClick = (ev: MouseEvent) => {
-      if ((ev.target as HTMLElement).closest('.volume-card-wrapper')) {
+      const nearestVolumeWrapper = (ev.target as HTMLElement).closest('.volume-card-wrapper');
+      const nearestSheetOverlay = (ev.target as HTMLElement).closest('[data-slot="sheet-overlay"]');
+
+      if (nearestVolumeWrapper || nearestSheetOverlay) {
         return;
       }
 
@@ -48,6 +54,16 @@ const MangaLibrary = ({
       document.removeEventListener("click", onDocumentClick);
     }
   }, []);
+
+  useEffect(() => {
+    if (!rightPanelRef?.current) {
+      return;
+    }
+
+    if (activeVolume) {
+      rightPanelRef.current.open();
+    }
+  }, [activeVolume])
 
   useEffect(() => {
     const clearVolume = () => {
@@ -100,11 +116,17 @@ const MangaLibrary = ({
       return prevVolumes.filter((volumeId) => {
         return volumeId !== volume.id;
       });
-    })
+    });
+  }
+
+  const handleRightPanelOpenChange = (open: boolean) => {
+    if (!open) {
+      setActiveVolume(null);
+    }
   }
 
   return (
-    <SidebarProvider className="w-full">
+    <SidebarProvider className="">
       <LeftPanel
         collections={collections}
         selectedCollection={activeCollection}
@@ -129,6 +151,10 @@ const MangaLibrary = ({
           ))}
         </div>
       </main>
+      <RightPanel
+        ref={rightPanelRef}
+        onOpenChange={handleRightPanelOpenChange}
+      />
       <Toaster />
     </SidebarProvider>
   );

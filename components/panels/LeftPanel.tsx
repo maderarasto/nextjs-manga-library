@@ -12,13 +12,13 @@ import {
 } from '../ui/sidebar';
 import Image from "next/image";
 import {Plus, Search} from "lucide-react";
-import CollectionMenuItem from "@/components/sidebar/CollectionMenuItem";
+import CollectionMenuItem from "@/components/CollectionMenuItem";
 import {InputGroup, InputGroupAddon, InputGroupInput} from "@/components/ui/input-group";
 import React from "react";
 import {toast} from "sonner";
 import {Volume} from "@/generated/prisma/client";
 import {CollectionWithVolumes} from "@/lib/types";
-import VolumeMenuItem from "@/components/sidebar/VolumeMenuItem";
+import VolumeMenuItem from "@/components/VolumeMenuItem";
 
 export type LeftPanelProps = {
   collections: CollectionWithVolumes[]
