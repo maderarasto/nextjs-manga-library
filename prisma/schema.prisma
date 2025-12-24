@@ -17,6 +17,7 @@ model Collection {
   id Int @id @default(autoincrement())
   userId String
   name String
+  summary String
   genres Genre[]
   volumes Volume[]
 }
@@ -33,7 +34,9 @@ model Volume {
   collectionId Int
   userId String
   name String
+  summary String
   state VolumeState @default(RELEASED)
+  pages Int
 }
 
 enum VolumeState {
