@@ -61,7 +61,7 @@ const MangaLibrary = ({
     }
 
     if (activeVolume) {
-      rightPanelRef.current.open();
+      rightPanelRef.current.open('Preview', activeVolume.id);
     }
   }, [activeVolume])
 

@@ -1,10 +1,13 @@
-import React, {forwardRef, useImperativeHandle, useState} from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle, useState} from 'react';
 import {Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle} from "@/components/ui/sheet";
 import {clsx} from "clsx";
 import VolumePreview from "@/components/VolumePreview";
 import VolumeForm from "@/components/VolumeForm";
 import VolumePreviewFooter from "@/components/VolumePreviewFooter";
 import VolumeFormFooter from "@/components/VolumeFormFooter";
+import VolumePreviewSkeleton from "@/components/panels/VolumePreviewSkeleton";
+import {VolumeWithCollection} from "@/lib/types";
+import {getVolume} from "@/lib/actions";
 
 type RightPanelMode = (
   | 'Preview'
@@ -12,7 +15,7 @@ type RightPanelMode = (
 )
 
 export interface RightPanelMethods {
-  open: () => void;
+  open: (mode: RightPanelMode, volumeId?: number) => void;
   close: () => void;
 }
 
@@ -23,8 +26,26 @@ export type RightPanelProps = {
 const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
   onOpenChange,
 }: RightPanelProps, ref) => {
+  const [volumeId, setVolumeId] = useState<number | null>(null);
+  const [volume, setVolume] = useState<VolumeWithCollection | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<RightPanelMode>("Preview");
+
+  useEffect(() => {
+    const clearVolume = () => {
+      setVolume(null);
+    }
+
+    if (!volumeId) {
+      clearVolume();
+      return;
+    }
+
+    getVolume(volumeId).then((volume) => {
+      setVolume(volume);
+    });
+
+  }, [volumeId]);
 
   const changeOpen = (open: boolean) => {
     let wasOpen;
@@ -35,13 +56,20 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
     });
 
     if (wasOpen != open && onOpenChange) {
-      setMode("Preview");
       onOpenChange(open);
+    }
+
+    if (!open) {
+      setMode("Preview");
+      setVolumeId(null);
+      setVolume(null);
     }
   }
 
   useImperativeHandle(ref, () => ({
-    open: () => {
+    open: (mode: RightPanelMode, volumeId?: number) => {
+      setMode(mode);
+      setVolumeId(volumeId ?? null);
       changeOpen(true);
     },
 
@@ -62,15 +90,26 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
             </SheetTitle>
           </SheetHeader>
           <div className="flex overflow-x-hidden">
-            <VolumePreview
-              className={clsx(
+            {!volumeId ? (
+              <VolumeForm className={clsx(
                 'w-full shrink-0 transition-transform duration-500',
-                mode !== 'Preview' ? '-translate-x-full' : '',
               )} />
-            <VolumeForm className={clsx(
-              'w-full shrink-0 transition-transform duration-500',
-              mode === 'Edit' ? '-translate-x-full' : '',
-            )} />
+            ) : volume ? (
+              <>
+                <VolumePreview
+                  volume={volume}
+                  className={clsx(
+                    'w-full shrink-0 transition-transform duration-500',
+                    mode !== 'Preview' ? '-translate-x-full' : '',
+                  )} />
+                <VolumeForm className={clsx(
+                  'w-full shrink-0 transition-transform duration-500',
+                  volumeId && mode === 'Edit' ? '-translate-x-full' : '',
+                )} />
+              </>
+            ) : (
+              <VolumePreviewSkeleton />
+            )}
           </div>
           <SheetFooter className="flex flex-row overflow-x-hidden">
             <VolumePreviewFooter

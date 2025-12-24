@@ -9,6 +9,10 @@ export type CollectionWithVolumes = CollectionGetPayload<{
 
 export type VolumeWithCollection = VolumeGetPayload<{
   include: {
-    collection: true
+    collection: {
+      include: {
+        genres: true
+      }
+    }
   }
 }>
