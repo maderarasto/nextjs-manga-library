@@ -1,9 +1,10 @@
-import React, {use} from 'react';
+import React from 'react';
 import {clsx} from "clsx";
 import {Badge} from "@/components/ui/badge";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {ChevronDown} from "lucide-react";
 import {VolumeWithCollection} from "@/lib/types";
+import DefaultVolumeCover from "@/components/DefaultVolumeCover";
 
 export type VolumePreviewProps = {
   volume: VolumeWithCollection
@@ -14,12 +15,10 @@ const VolumePreview = ({
   volume,
   className,
 }: VolumePreviewProps) => {
-  console.log(volume);
-
   return (
     <div className={clsx('p-4 overflow-y-auto', className)}>
       <div className="flex justify-center mb-12">
-        <div className="volume-card w-64 h-96"></div>
+        <DefaultVolumeCover title={volume.name} className="w-64 h-96 text-xl" />
       </div>
       <div className="mb-4">
         <h4 className="mb-0 uppercase">{volume.collection.name}</h4>
@@ -32,7 +31,7 @@ const VolumePreview = ({
       </div>
       <div className="flex flex-col mb-8">
         <h4 className="font-bold text-lg uppercase text-muted-foreground">Summary</h4>
-        <p>{volume.summary}</p>
+        <p className="">{volume.summary}</p>
       </div>
       <div className="content-center my-12">
         <div className="grid grid-cols-2 gap-4">
@@ -42,7 +41,7 @@ const VolumePreview = ({
               <DropdownMenu>
                 <DropdownMenuTrigger onClick={() => {}}>
                   <Badge className="px-2 rounded-sm text-sm capitalize">
-                    {volume.state.toLowerCase()}
+                    {volume.state?.toLowerCase()}
                     <ChevronDown size={24} className="mt-0.5" />
                   </Badge>
                 </DropdownMenuTrigger>

@@ -34,9 +34,9 @@ model Volume {
   collectionId Int
   userId String
   name String
-  summary String
-  state VolumeState @default(RELEASED)
-  pages Int
+  summary String? @default("")
+  state VolumeState? @default(RELEASED)
+  pages Int? @default(0)
 }
 
 enum VolumeState {

@@ -1,13 +1,15 @@
-import React, {forwardRef, useEffect, useImperativeHandle, useState} from 'react';
+import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState} from 'react';
 import {Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle} from "@/components/ui/sheet";
 import {clsx} from "clsx";
 import VolumePreview from "@/components/VolumePreview";
-import VolumeForm from "@/components/VolumeForm";
+import VolumeForm, {VolumeFormMethods} from "@/components/VolumeForm";
 import VolumePreviewFooter from "@/components/VolumePreviewFooter";
 import VolumeFormFooter from "@/components/VolumeFormFooter";
 import VolumePreviewSkeleton from "@/components/panels/VolumePreviewSkeleton";
 import {VolumeWithCollection} from "@/lib/types";
 import {getVolume} from "@/lib/actions";
+import ConfirmDialog, {ConfirmDialogMethods} from "@/components/ConfirmDialog";
+import {toast} from "sonner";
 
 type RightPanelMode = (
   | 'Preview'
@@ -21,15 +23,20 @@ export interface RightPanelMethods {
 
 export type RightPanelProps = {
   onOpenChange?: (open: boolean) => void,
+  onVolumeUpdate?: (volumeId: number) => void,
 }
 
 const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
   onOpenChange,
+  onVolumeUpdate,
 }: RightPanelProps, ref) => {
   const [volumeId, setVolumeId] = useState<number | null>(null);
   const [volume, setVolume] = useState<VolumeWithCollection | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<RightPanelMode>("Preview");
+
+  const formRef = useRef<VolumeFormMethods>(null);
+  const dialogRef = useRef<ConfirmDialogMethods>(null);
 
   useEffect(() => {
     const clearVolume = () => {
@@ -64,6 +71,36 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
       setVolumeId(null);
       setVolume(null);
     }
+  }
+
+  const handleFormSuccess = () => {
+    if (volumeId) {
+      onVolumeUpdate?.(volumeId);
+      setMode("Preview");
+      setVolume(null);
+
+      getVolume(volumeId).then((volume) => {
+        setVolume(volume);
+      });
+
+      toast.success(`A volume successfully updated`, {
+        position: "top-center",
+      });
+    } else {
+      changeOpen(false);
+      toast.success(`A new volume successfully created`, {
+        position: "top-center",
+      });
+    }
+  }
+
+  const handleBack = () => {
+    if (!(formRef.current?.isDirty() ?? false)) {
+      setMode("Preview");
+      return;
+    }
+
+    dialogRef.current?.open();
   }
 
   useImperativeHandle(ref, () => ({
@@ -101,11 +138,17 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
                   className={clsx(
                     'w-full shrink-0 transition-transform duration-500',
                     mode !== 'Preview' ? '-translate-x-full' : '',
-                  )} />
-                <VolumeForm className={clsx(
-                  'w-full shrink-0 transition-transform duration-500',
-                  volumeId && mode === 'Edit' ? '-translate-x-full' : '',
-                )} />
+                  )}
+                />
+                <VolumeForm
+                  ref={formRef}
+                  volume={volume}
+                  className={clsx(
+                    'w-full shrink-0 transition-transform duration-500',
+                    volumeId && mode === 'Edit' ? '-translate-x-full' : '',
+                  )}
+                  onSuccess={handleFormSuccess}
+                />
               </>
             ) : (
               <VolumePreviewSkeleton />
@@ -125,11 +168,22 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
                 mode === 'Edit' ? '-translate-x-full' : '',
                 mode !== 'Edit' ? 'invisible' : '',
               )}
-              onBack={() => setMode("Preview")}
+              onSaveClick={() => formRef.current?.submit()}
+              onBackClick={handleBack}
             />
           </SheetFooter>
         </SheetContent>
       </Sheet>
+      <ConfirmDialog
+        ref={dialogRef}
+        title="Are you sure you want to go back?"
+        description="You have unsaved changes and going back without saving will discard them."
+        onConfirm={() => {
+          console.log('a');
+          formRef.current?.reset();
+          setMode("Preview");
+        }}
+      />
     </div>
   );
 });

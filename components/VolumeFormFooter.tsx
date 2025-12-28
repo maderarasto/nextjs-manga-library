@@ -1,29 +1,34 @@
 import React from 'react';
-import {VolumeFormProps} from "@/components/VolumeForm";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft, Check} from "lucide-react";
 import {clsx} from "clsx";
 
 export type VolumeFormFooterProps = {
   className?: string;
-  onBack?: (success?: boolean) => void;
+  onSaveClick?: () => void;
+  onBackClick?: () => void;
 }
 
 const VolumeFormFooter = ({
   className,
-  onBack,
+  onSaveClick,
+  onBackClick,
 }: VolumeFormFooterProps) => {
   return (
     <div className={clsx('flex flex-col gap-2', className)}>
       <Button
         variant="outline"
         className="flex-1"
-        onClick={() => onBack?.call(null)}
+        onClick={() => onBackClick?.()}
       >
         <ArrowLeft size={24} />
         Back to preview
       </Button>
-      <Button variant="default" className="flex-1">
+      <Button
+        variant="default"
+        className="flex-1"
+        onClick={() => onSaveClick?.()}
+      >
         <Check size={24} />
         Save
       </Button>

@@ -1,22 +1,180 @@
-import React from 'react';
-import {clsx} from "clsx";
+import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
+import DefaultVolumeCover from "@/components/DefaultVolumeCover";
+import {cn} from "@/lib/utils";
+import {useForm} from "react-hook-form";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/ui/textarea";
+import {Collection, Volume} from "@/generated/prisma/client";
+import {getCollections, updateVolume} from "@/lib/actions";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import {volumeSchema, VolumeSchemaType} from "@/lib/schemas";
 
-export type VolumeFormProps = {
-  className?: string;
+export interface VolumeFormMethods {
+  submit: () => void
+  reset: () => void
+  isDirty: () => boolean
 }
 
-const VolumeForm = ({
-  className,
-}: VolumeFormProps) => {
-  return (
-    <>
-      <div className={clsx('p-4 overflow-y-auto', className)}>
-        <div className="flex justify-center mb-12">
-          <div className="volume-card w-64 h-96"></div>
-        </div>
-      </div>
-    </>
-  );
-};
+type VolumeFormProps = {
+  volume?: Volume
+  className?: string
+  onSuccess?: () => void
+  onError?: (err: Error) => void
+}
 
+const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
+  volume,
+  className,
+  onSuccess,
+  onError,
+}: VolumeFormProps, ref) => {
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      const collections = await getCollections();
+      setCollections(collections);
+    }
+
+    loadCollections();
+  }, []);
+
+  const form = useForm<VolumeSchemaType>({
+    resolver: zodResolver(volumeSchema),
+    defaultValues: {
+      collectionId: volume?.collectionId ?? 0,
+      name: volume?.name ?? '',
+      summary: volume?.summary ?? '',
+      pages: volume?.pages ?? 0,
+    },
+  });
+
+  const onSubmit = async (values: VolumeSchemaType) => {
+    try {
+      if (volume) {
+        await updateVolume(volume.id, values);
+      } else {
+
+      }
+
+      onSuccess?.();
+    } catch (err) {
+      if (err instanceof Error) {
+        onError?.(err);
+      } else {
+        console.error(err);
+      }
+    }
+  }
+
+  useImperativeHandle(ref, () => ({
+    submit: async () => {
+      await form.handleSubmit(onSubmit)();
+    },
+
+    reset: () => {
+      form.reset();
+    },
+
+    isDirty: () => {
+      return form.formState.isDirty;
+    }
+  }));
+
+  return (
+    <div className={cn('p-4 overflow-y-auto', className)}>
+      <div className="flex justify-center mb-12">
+        <DefaultVolumeCover className="w-64 h-96" />
+      </div>
+      <Form {...form}>
+        <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="collectionId"
+            render={({ field }) => (
+              <FormItem className="mb-4 space-y-1">
+                <FormLabel>Collection</FormLabel>
+                <FormControl>
+                  <Select
+                    name={field.name}
+                    value={field.value.toString()}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select collection..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Collections</SelectLabel>
+                        {collections.map((collection) => (
+                          <SelectItem key={collection.id} value={collection.id.toString()}>
+                            {collection.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="mb-4 space-y-1">
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+          <FormField
+            control={form.control}
+            name="summary"
+            render={({ field }) => (
+              <FormItem className="mb-4 space-y-1">
+                <FormLabel>Summary</FormLabel>
+                <FormControl>
+                  <Textarea
+                    rows={10}
+                    className="resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+          <FormField
+            control={form.control}
+            name="pages"
+            render={({ field }) => (
+              <FormItem className="mb-4 space-y-1">
+                <FormLabel>Pages</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+        </form>
+      </Form>
+    </div>
+  );
+})
+
+VolumeForm.displayName = "VolumeForm";
 export default VolumeForm;

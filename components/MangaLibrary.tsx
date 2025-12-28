@@ -125,6 +125,10 @@ const MangaLibrary = ({
     }
   }
 
+  const handleVolumeUpdate = () => {
+
+  }
+
   return (
     <SidebarProvider className="">
       <LeftPanel
@@ -154,6 +158,7 @@ const MangaLibrary = ({
       <RightPanel
         ref={rightPanelRef}
         onOpenChange={handleRightPanelOpenChange}
+        onVolumeUpdate={handleVolumeUpdate}
       />
       <Toaster />
     </SidebarProvider>
