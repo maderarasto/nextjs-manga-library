@@ -1,13 +1,13 @@
 import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
 import DefaultVolumeCover from "@/components/DefaultVolumeCover";
 import {cn} from "@/lib/utils";
-import {useForm} from "react-hook-form";
+import {FieldPath, useForm} from "react-hook-form";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
 import {Collection, Volume} from "@/generated/prisma/client";
-import {getCollections, updateVolume} from "@/lib/actions";
+import {ActionError, createVolume, getCollections, ServerResult, updateVolume} from "@/lib/actions";
 import {
   Select,
   SelectContent,
@@ -61,20 +61,21 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
   });
 
   const onSubmit = async (values: VolumeSchemaType) => {
-    try {
-      if (volume) {
-        await updateVolume(volume.id, values);
-      } else {
+    const {error} = volume ? (
+      await updateVolume(volume.id, values)
+    ) : (
+      await createVolume(values)
+    );
 
-      }
+    console.log(onSuccess);
 
+    if (!error) {
       onSuccess?.();
-    } catch (err) {
-      if (err instanceof Error) {
-        onError?.(err);
-      } else {
-        console.error(err);
-      }
+    } else {
+      form.setError(error.type as FieldPath<VolumeSchemaType>, {
+        type: 'custom',
+        message: `Error: ${error.message}`,
+      });
     }
   }
 

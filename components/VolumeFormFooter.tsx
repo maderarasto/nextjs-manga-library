@@ -4,29 +4,31 @@ import {ArrowLeft, Check} from "lucide-react";
 import {clsx} from "clsx";
 
 export type VolumeFormFooterProps = {
-  className?: string;
-  onSaveClick?: () => void;
-  onBackClick?: () => void;
+  className?: string
+  showBack?: boolean
+  onSaveClick?: () => void
+  onBackClick?: () => void
 }
 
 const VolumeFormFooter = ({
   className,
+  showBack = true,
   onSaveClick,
   onBackClick,
 }: VolumeFormFooterProps) => {
   return (
-    <div className={clsx('flex flex-col gap-2', className)}>
-      <Button
-        variant="outline"
-        className="flex-1"
-        onClick={() => onBackClick?.()}
-      >
-        <ArrowLeft size={24} />
-        Back to preview
-      </Button>
+    <div className={clsx('flex flex-col justify-end gap-2', className)}>
+      {showBack ? (
+        <Button
+          variant="outline"
+          onClick={() => onBackClick?.()}
+        >
+          <ArrowLeft size={24} />
+          Back to preview
+        </Button>
+      ) : ''}
       <Button
         variant="default"
-        className="flex-1"
         onClick={() => onSaveClick?.()}
       >
         <Check size={24} />

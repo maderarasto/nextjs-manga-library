@@ -5,14 +5,17 @@ import {UserButton} from "@clerk/nextjs";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import {CollectionWithVolumes} from "@/lib/types";
 import {Button} from "@/components/ui/button";
+import {Plus} from "lucide-react";
 
 export type TopbarProps = {
   activeCollection: CollectionWithVolumes | null;
+  onCreateVolumeClick?: () => void;
   onCollectionChanged?: (collection: CollectionWithVolumes | null) => void;
 }
 
 const Topbar = ({
   activeCollection,
+  onCreateVolumeClick,
   onCollectionChanged,
 }: TopbarProps) => {
   const changeCollection = (collection: CollectionWithVolumes | null) => {
@@ -44,6 +47,10 @@ const Topbar = ({
         </Breadcrumb>
       </div>
       <div className="flex items-center gap-2">
+        <Button onClick={onCreateVolumeClick}>
+          <Plus size={24} />
+          New Volume
+        </Button>
         <DarkModeToggle />
         <UserButton />
       </div>

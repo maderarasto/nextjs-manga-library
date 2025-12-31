@@ -23,12 +23,12 @@ export interface RightPanelMethods {
 
 export type RightPanelProps = {
   onOpenChange?: (open: boolean) => void,
-  onVolumeUpdate?: (volumeId: number) => void,
+  onShouldUpdateData?: () => void,
 }
 
 const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
   onOpenChange,
-  onVolumeUpdate,
+  onShouldUpdateData,
 }: RightPanelProps, ref) => {
   const [volumeId, setVolumeId] = useState<number | null>(null);
   const [volume, setVolume] = useState<VolumeWithCollection | null>(null);
@@ -74,11 +74,11 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
   }
 
   const handleFormSuccess = () => {
-    if (volumeId) {
-      onVolumeUpdate?.(volumeId);
-      setMode("Preview");
-      setVolume(null);
+    onShouldUpdateData?.();
 
+    if (volumeId) {
+      setVolume(null);
+      setMode("Preview");
       getVolume(volumeId).then((volume) => {
         setVolume(volume);
       });
@@ -128,9 +128,13 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
           </SheetHeader>
           <div className="flex overflow-x-hidden">
             {!volumeId ? (
-              <VolumeForm className={clsx(
-                'w-full shrink-0 transition-transform duration-500',
-              )} />
+              <VolumeForm
+                ref={formRef}
+                className={clsx(
+                  'w-full shrink-0 transition-transform duration-500',
+                )}
+                onSuccess={handleFormSuccess}
+              />
             ) : volume ? (
               <>
                 <VolumePreview
@@ -168,6 +172,7 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
                 mode === 'Edit' ? '-translate-x-full' : '',
                 mode !== 'Edit' ? 'invisible' : '',
               )}
+              showBack={!!volumeId}
               onSaveClick={() => formRef.current?.submit()}
               onBackClick={handleBack}
             />

@@ -120,9 +120,13 @@ export default function Home() {
     });
   }
 
-  const handleVolumeUpdate = () => {
+  const handleShouldUpdateData = () => {
     setCollections([]);
     loadCollections();
+  }
+
+  const handleCreateVolumeClick = () => {
+    rightPanelRef.current?.open('Edit');
   }
 
   return (
@@ -137,6 +141,7 @@ export default function Home() {
       <main className="flex-1">
         <Topbar
           activeCollection={activeCollection}
+          onCreateVolumeClick={handleCreateVolumeClick}
           onCollectionChanged={handleCollectionChanged}
         />
         <Library
@@ -150,7 +155,7 @@ export default function Home() {
       <RightPanel
         ref={rightPanelRef}
         onOpenChange={handleRightPanelOpenChange}
-        onVolumeUpdate={handleVolumeUpdate}
+        onShouldUpdateData={handleShouldUpdateData}
       />
       <Toaster />
     </SidebarProvider>

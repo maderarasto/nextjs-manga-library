@@ -6,6 +6,23 @@ import {Collection} from "@/generated/prisma/client";
 import {currentUser} from "@clerk/nextjs/server";
 import {VolumeSchemaType} from "@/lib/schemas";
 
+export type ActionError = {
+  message: string
+  type?: string
+};
+
+export type DataResult<D> = {
+  data: D
+  error?: never
+};
+
+export type ErrorResult = {
+  data?: never
+  error: ActionError
+};
+
+export type ServerResult<D> = DataResult<D> | ErrorResult;
+
 export async function getCollections(search: string = ''): Promise<Collection[]>
 {
   const user = await currentUser();
@@ -61,15 +78,49 @@ export async function getVolume(volumeId: number): Promise<VolumeWithCollection|
   })
 }
 
-export async function updateVolume(volumeId: number, data: VolumeSchemaType) {
-  console.log(data);
+export async function createVolume(data: VolumeSchemaType): Promise<ServerResult<void>>
+{
   const user = await currentUser();
 
   if (!user) {
     throw new Error("Unauthorized");
   }
 
-  return prisma.volume.update({
+  const foundVolume = await prisma.volume.findFirst({
+    where: {
+      name: data.name,
+    }
+  });
+
+  if (foundVolume) {
+    return {
+      error: {
+        type: 'name',
+        message: `A volume with name "${data.name}" already exists.`,
+      }
+    }
+  }
+
+  await prisma.volume.create({
+    data: {
+      ...data,
+      userId: user.id,
+    }
+  });
+
+  return {
+    data: undefined,
+  };
+}
+
+export async function updateVolume(volumeId: number, data: VolumeSchemaType): Promise<ServerResult<void>> {
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.volume.update({
     where: {
       id: volumeId,
     },
@@ -78,5 +129,9 @@ export async function updateVolume(volumeId: number, data: VolumeSchemaType) {
       userId: user.id,
     }
   });
+
+  return {
+    data: undefined,
+  }
 }
 
