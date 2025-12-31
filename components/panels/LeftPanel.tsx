@@ -22,18 +22,18 @@ import VolumeMenuItem from "@/components/VolumeMenuItem";
 
 export type LeftPanelProps = {
   collections: CollectionWithVolumes[]
-  selectedCollection?: CollectionWithVolumes | null
-  selectedVolume?: Volume | null
-  onSelectedCollection?: (collection: CollectionWithVolumes) => void
-  onSelectedVolume?: (volume: Volume) => void
+  activeCollection?: CollectionWithVolumes | null
+  activeVolume?: Volume | null
+  onActiveCollectionChange?: (collection: CollectionWithVolumes) => void
+  onActiveVolumeChange?: (volume: Volume) => void
 }
 
 const LeftPanel = ({
   collections,
-  selectedCollection,
-  selectedVolume,
-  onSelectedCollection,
-  onSelectedVolume,
+  activeCollection,
+  activeVolume,
+  onActiveCollectionChange,
+  onActiveVolumeChange,
 }: LeftPanelProps) => {
   const {open: isOpen} = useSidebar();
 
@@ -44,19 +44,19 @@ const LeftPanel = ({
   }
 
   const selectCollection = (collection: CollectionWithVolumes) => {
-    if (!onSelectedCollection) {
+    if (!onActiveCollectionChange) {
       return;
     }
 
-    onSelectedCollection(collection);
+    onActiveCollectionChange(collection);
   }
 
   const selectVolume = (volume: Volume) => {
-    if (!onSelectedVolume) {
+    if (!onActiveVolumeChange) {
       return;
     }
 
-    onSelectedVolume(volume);
+    onActiveVolumeChange(volume);
   }
 
   return (
@@ -98,13 +98,13 @@ const LeftPanel = ({
                   key={`${collection.name}-${collection.id}`}
                   label={collection.name}
                   onClick={() => selectCollection(collection)}
-                  active={selectedCollection?.id === collection.id}
+                  active={activeCollection?.id === collection.id}
                 >
                   {collection.volumes.map((volume) => (
                     <VolumeMenuItem
                       key={volume.name}
                       label={volume.name}
-                      active={selectedVolume?.id === volume.id}
+                      active={activeVolume?.id === volume.id}
                       onClick={() => selectVolume(volume)}
                     />
                   ))}

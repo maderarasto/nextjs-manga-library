@@ -8,27 +8,19 @@ import {cn} from "@/lib/utils";
 
 export type VolumeCardProps = {
   volume: Volume,
-  onPick?: (volume: Volume) => void,
+  onClick?: () => void,
   selected?: boolean,
   active?: boolean
 }
 
 const VolumeCard = ({
   volume,
-  onPick,
+  onClick,
   selected = false,
   active = false,
 }: VolumeCardProps) => {
-  const handleClick = () => {
-    if (!onPick) {
-      return;
-    }
-
-    onPick(volume);
-  }
-
   return (
-    <div className="volume-card-wrapper" onClick={handleClick}>
+    <div className="volume-card-wrapper" onClick={onClick}>
       <DefaultVolumeCover title={volume.name} className={cn(
         active ? 'ring-4 ring-emerald-500 dark:ring-emerald-700' : '',
         selected ? 'ring-4 ring-slate-600 dark:ring-white' : '',

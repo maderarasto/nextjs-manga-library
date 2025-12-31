@@ -1,6 +1,6 @@
 'use server';
 
-import {VolumeWithCollection} from "@/lib/types";
+import {CollectionWithVolumes, VolumeWithCollection} from "@/lib/types";
 import prisma from "@/lib/prisma";
 import {Collection} from "@/generated/prisma/client";
 import {currentUser} from "@clerk/nextjs/server";
@@ -21,6 +21,27 @@ export async function getCollections(search: string = ''): Promise<Collection[]>
         contains: search,
         mode: 'insensitive'
       }
+    }
+  })
+}
+
+export async function getCollectionsWithVolumes(search: string = ''): Promise<CollectionWithVolumes[]> {
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  return prisma.collection.findMany({
+    where: {
+      userId: user.id,
+      name: {
+        contains: search,
+        mode: 'insensitive'
+      }
+    },
+    include: {
+      volumes: true
     }
   })
 }
