@@ -73,6 +73,21 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
     }
   }
 
+  const handleUpdate = () => {
+    if (!volumeId) {
+      return;
+    }
+
+
+    setVolume(null);
+    setMode("Preview");
+
+    onShouldUpdateData?.();
+    getVolume(volumeId).then((volume) => {
+      setVolume(volume);
+    });
+  }
+
   const handleFormSuccess = () => {
     onShouldUpdateData?.();
 
@@ -84,12 +99,12 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
       });
 
       toast.success(`A volume successfully updated`, {
-        position: "top-center",
+        position: "top-right",
       });
     } else {
       changeOpen(false);
       toast.success(`A new volume successfully created`, {
-        position: "top-center",
+        position: "top-right",
       });
     }
   }
@@ -143,6 +158,7 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
                     'w-full shrink-0 transition-transform duration-500',
                     mode !== 'Preview' ? '-translate-x-full' : '',
                   )}
+                  onUpdate={handleUpdate}
                 />
                 <VolumeForm
                   ref={formRef}
@@ -184,7 +200,6 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
         title="Are you sure you want to go back?"
         description="You have unsaved changes and going back without saving will discard them."
         onConfirm={() => {
-          console.log('a');
           formRef.current?.reset();
           setMode("Preview");
         }}

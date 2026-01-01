@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import DefaultVolumeCover from "@/components/DefaultVolumeCover";
 import {cn} from "@/lib/utils";
 import {FieldPath, useForm} from "react-hook-form";
@@ -7,6 +7,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
 import {Collection, Volume} from "@/generated/prisma/client";
+import {VolumeState} from "@/generated/prisma/enums";
 import {ActionError, createVolume, getCollections, ServerResult, updateVolume} from "@/lib/actions";
 import {
   Select,
@@ -57,6 +58,7 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
       name: volume?.name ?? '',
       summary: volume?.summary ?? '',
       pages: volume?.pages ?? 0,
+      state: VolumeState.RELEASED
     },
   });
 
@@ -166,6 +168,36 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
                 <FormLabel>Pages</FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem className="mb-4 space-y-1">
+                <FormLabel>State</FormLabel>
+                <FormControl>
+                  <Select
+                    name={field.name}
+                    value={field.value.toString()}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger className="w-full capitalize">
+                      <SelectValue placeholder="Select state..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Collections</SelectLabel>
+                        {Object.values(VolumeState).map((state) => (
+                          <SelectItem key={state} value={state.toString()} className="capitalize">
+                            {state.toLowerCase()}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
