@@ -7,17 +7,20 @@ import RightPanel, {RightPanelMethods} from "@/components/panels/RightPanel";
 import {SidebarProvider} from "@/components/ui/sidebar";
 import LeftPanel from "@/components/panels/LeftPanel";
 import Topbar from "@/components/Topbar";
-import {Toaster} from "sonner";
-import {getCollectionsWithVolumes} from "@/lib/actions";
+import {toast, Toaster} from "sonner";
+import {deleteVolume, getCollectionsWithVolumes} from "@/lib/actions";
 import Library from "@/components/Library";
+import ConfirmDialog, {ConfirmDialogMethods} from "@/components/ConfirmDialog";
 
 export default function Home() {
   const [collections, setCollections] = useState<CollectionWithVolumes[]>([]);
   const [activeVolume, setActiveVolume] = useState<Volume|null>(null);
+  const [volumeForDeletion, setVolumeForDeletion] = useState<Volume|null>(null);
   const [activeCollection, setActiveCollection] = useState<CollectionWithVolumes|null>(null);
   const [selectedVolumeIds, setSelectedVolumeIds] = useState<number[]>([]);
 
   const rightPanelRef = useRef<RightPanelMethods>(null);
+  const deleteDialogRef = useRef<ConfirmDialogMethods>(null);
 
   const loadCollections = useCallback(async () => {
     getCollectionsWithVolumes().then((collections) => {
@@ -125,6 +128,25 @@ export default function Home() {
     loadCollections();
   }
 
+  const handleConfirmDeleteVolume = async () => {
+    if (!volumeForDeletion) {
+      return;
+    }
+
+    const volumeName = volumeForDeletion.name;
+    await deleteVolume(volumeForDeletion.id);
+
+    setVolumeForDeletion(null);
+    setCollections([]);
+    loadCollections();
+
+    if (rightPanelRef.current?.isOpen()) {
+      rightPanelRef.current.close();
+    }
+
+    toast.success(`A volume with name "${volumeName}" successfully deleted.`);
+  }
+
   const handleCreateVolumeClick = () => {
     rightPanelRef.current?.open('Edit');
   }
@@ -156,7 +178,19 @@ export default function Home() {
         ref={rightPanelRef}
         onOpenChange={handleRightPanelOpenChange}
         onShouldUpdateData={handleShouldUpdateData}
+        onDeleteVolume={(volume) => {
+          setVolumeForDeletion(volume);
+          deleteDialogRef.current?.open();
+        }}
       />
+      {volumeForDeletion ? (
+        <ConfirmDialog
+          ref={deleteDialogRef}
+          title="Are you sure you want to delete this volume?"
+          description={`A volume with name "${volumeForDeletion.name}" will be permanently deleted.`}
+          onConfirm={handleConfirmDeleteVolume}
+        />
+      ) : ''}
       <Toaster />
     </SidebarProvider>
   );

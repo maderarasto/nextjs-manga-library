@@ -1,4 +1,4 @@
-import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState} from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from 'react';
 import {Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle} from "@/components/ui/sheet";
 import {clsx} from "clsx";
 import VolumePreview from "@/components/VolumePreview";
@@ -17,18 +17,21 @@ type RightPanelMode = (
 )
 
 export interface RightPanelMethods {
-  open: (mode: RightPanelMode, volumeId?: number) => void;
+  isOpen: () => boolean
+  open: (mode: RightPanelMode, volumeId?: number) => void
   close: () => void;
 }
 
 export type RightPanelProps = {
   onOpenChange?: (open: boolean) => void,
   onShouldUpdateData?: () => void,
+  onDeleteVolume?: (volume: VolumeWithCollection) => void,
 }
 
 const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
   onOpenChange,
   onShouldUpdateData,
+  onDeleteVolume,
 }: RightPanelProps, ref) => {
   const [volumeId, setVolumeId] = useState<number | null>(null);
   const [volume, setVolume] = useState<VolumeWithCollection | null>(null);
@@ -36,7 +39,7 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
   const [mode, setMode] = useState<RightPanelMode>("Preview");
 
   const formRef = useRef<VolumeFormMethods>(null);
-  const dialogRef = useRef<ConfirmDialogMethods>(null);
+  const exitDialogRef = useRef<ConfirmDialogMethods>(null);
 
   useEffect(() => {
     const clearVolume = () => {
@@ -115,10 +118,14 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
       return;
     }
 
-    dialogRef.current?.open();
+    exitDialogRef.current?.open();
   }
 
   useImperativeHandle(ref, () => ({
+    isOpen: () => {
+      return isOpen;
+    },
+
     open: (mode: RightPanelMode, volumeId?: number) => {
       setMode(mode);
       setVolumeId(volumeId ?? null);
@@ -181,6 +188,11 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
                 mode !== 'Preview' ? 'invisible -translate-x-full' : '',
               )}
               onEditClick={() => setMode("Edit")}
+              onDeleteClick={() => {
+                if (volume) {
+                  onDeleteVolume?.(volume)
+                }
+              }}
             />
             <VolumeFormFooter
               className={clsx(
@@ -196,7 +208,7 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
         </SheetContent>
       </Sheet>
       <ConfirmDialog
-        ref={dialogRef}
+        ref={exitDialogRef}
         title="Are you sure you want to go back?"
         description="You have unsaved changes and going back without saving will discard them."
         onConfirm={() => {

@@ -135,3 +135,21 @@ export async function updateVolume(volumeId: number, data: VolumeSchemaType): Pr
   }
 }
 
+export async function deleteVolume(volumeId: number): Promise<ServerResult<void>> {
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  await prisma.volume.delete({
+    where: {
+      id: volumeId,
+    }
+  });
+
+  return {
+    data: undefined,
+  };
+}
+
