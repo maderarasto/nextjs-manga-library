@@ -141,7 +141,7 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
               {mode === 'Edit' ? ' Form' : ''}
             </SheetTitle>
           </SheetHeader>
-          <div className="flex overflow-x-hidden">
+          <div className="flex flex-1 overflow-x-hidden">
             {!volumeId ? (
               <VolumeForm
                 ref={formRef}
@@ -171,7 +171,7 @@ const RightPanel = forwardRef<RightPanelMethods, RightPanelProps>(({
                 />
               </>
             ) : (
-              <VolumePreviewSkeleton />
+              <VolumePreviewSkeleton className="w-full" />
             )}
           </div>
           <SheetFooter className="flex flex-row overflow-x-hidden">

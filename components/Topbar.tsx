@@ -6,6 +6,7 @@ import DarkModeToggle from "@/components/DarkModeToggle";
 import {CollectionWithVolumes} from "@/lib/types";
 import {Button} from "@/components/ui/button";
 import {Plus} from "lucide-react";
+import {cn} from "@/lib/utils";
 
 export type TopbarProps = {
   activeCollection: CollectionWithVolumes | null;
@@ -27,7 +28,7 @@ const Topbar = ({
   }
 
   return (
-    <nav className="flex flex-row justify-between items-center gap-2 w-full h-12 border-b px-2 pr-4">
+    <nav className="sticky top-0 flex flex-row justify-between items-center gap-2 w-full h-12 border-b px-2 pr-4 bg-background z-50">
       <div className="flex items-center gap-2">
         <SidebarTrigger />
         <Breadcrumb>
@@ -49,7 +50,9 @@ const Topbar = ({
       <div className="flex items-center gap-2">
         <Button onClick={onCreateVolumeClick}>
           <Plus size={24} />
-          New Volume
+          <span className="hidden sm:inline">
+            New Volume
+          </span>
         </Button>
         <DarkModeToggle />
         <UserButton />

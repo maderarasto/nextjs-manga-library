@@ -98,7 +98,7 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
   return (
     <div className={cn('p-4 overflow-y-auto', className)}>
       <div className="flex justify-center mb-12">
-        <DefaultVolumeCover className="w-64 h-96" />
+        <DefaultVolumeCover className="w-32 md:w-48 h-48 md:h-72 text-sm md:text-base" />
       </div>
       <Form {...form}>
         <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)}>
@@ -139,7 +139,7 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
               <FormItem className="mb-4 space-y-1">
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input className="text-sm md:text-base" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -153,7 +153,7 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
                 <FormControl>
                   <Textarea
                     rows={10}
-                    className="resize-none"
+                    className="resize-none text-sm md:text-base"
                     {...field}
                   />
                 </FormControl>
@@ -167,7 +167,7 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
               <FormItem className="mb-4 space-y-1">
                 <FormLabel>Pages</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input className="text-sm md:text-base" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -185,7 +185,7 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
                     onValueChange={field.onChange}
                   >
                     <SelectTrigger className="w-full capitalize">
-                      <SelectValue placeholder="Select state..." />
+                      <SelectValue className="text-sm md:text-base" placeholder="Select state..." />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
