@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Volume} from "@/generated/prisma/client";
 import VolumeCard from "@/components/VolumeCard";
+import {VolumeAction} from "@/components/VolumeContextMenu";
 
 type LibraryProps = {
   volumes: Volume[]
@@ -8,6 +9,7 @@ type LibraryProps = {
   activeVolume?: Volume
   onPickVolume?: (volume: Volume) => void
   onSelectedVolume?: (volume: Volume) => void
+  onVolumeAction?: (volume: Volume, action: VolumeAction) => void
 };
 
 const Library = ({
@@ -16,6 +18,7 @@ const Library = ({
   activeVolume,
   onPickVolume,
   onSelectedVolume,
+  onVolumeAction,
 }: LibraryProps) => {
   const [isControlDown, setIsControlDown] = useState<boolean>(false);
 
@@ -53,6 +56,7 @@ const Library = ({
           key={volume.name}
           volume={volume}
           onClick={() => pickVolume(volume)}
+          onContextMenuAction={(action) => onVolumeAction?.(volume, action)}
           selected={!!selectedVolumes.find((vol) => {
             return vol.id === volume.id
           })}

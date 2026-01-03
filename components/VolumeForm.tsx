@@ -69,8 +69,6 @@ const VolumeForm = forwardRef<VolumeFormMethods, VolumeFormProps>(({
       await createVolume(values)
     );
 
-    console.log(onSuccess);
-
     if (!error) {
       onSuccess?.();
     } else {

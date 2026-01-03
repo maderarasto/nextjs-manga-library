@@ -11,6 +11,7 @@ import {toast, Toaster} from "sonner";
 import {deleteVolume, getCollectionsWithVolumes} from "@/lib/actions";
 import Library from "@/components/Library";
 import ConfirmDialog, {ConfirmDialogMethods} from "@/components/ConfirmDialog";
+import {VolumeAction} from "@/components/VolumeContextMenu";
 
 export default function Home() {
   const [collections, setCollections] = useState<CollectionWithVolumes[]>([]);
@@ -31,12 +32,13 @@ export default function Home() {
   useEffect(() => {
     const onDocumentClick = (ev: MouseEvent) => {
       const nearestVolumeWrapper = (ev.target as HTMLElement).closest('.volume-card-wrapper');
+      const nearestVolumeContextMenu = (ev.target as HTMLElement).closest('.volume-context-menu');
       const nearestSheetOverlay = (ev.target as HTMLElement).closest('[data-slot="sheet-overlay"]');
 
-      if (nearestVolumeWrapper || nearestSheetOverlay) {
+      if (nearestVolumeWrapper || nearestVolumeContextMenu || nearestSheetOverlay) {
         return;
       }
-
+      console.log(ev.target);
       setSelectedVolumeIds([]);
     }
 
@@ -93,6 +95,7 @@ export default function Home() {
   }
 
   const handleCollectionChanged = (collection: CollectionWithVolumes|null) => {
+    console.log('CollectionChange');
     setSelectedVolumeIds([]);
     setActiveCollection(collection);
   }
@@ -107,7 +110,23 @@ export default function Home() {
     setActiveVolume(volume);
   }
 
+  const handleVolumeAction = (volume: Volume, action: VolumeAction) => {
+    if (action === 'Select') {
+      setSelectedVolumeIds((prevSelectedIds) => {
+        return [...prevSelectedIds, volume.id];
+      });
+    } else if (action === 'Preview') {
+      setActiveVolume(volume);
+    } else if (action === 'Edit') {
+      rightPanelRef.current?.open('Edit', volume.id);
+    } else if (action === 'Delete') {
+      setVolumeForDeletion(volume);
+      deleteDialogRef.current?.open();
+    }
+  }
+
   const handleSelectedVolume = (volume: Volume) => {
+    console.log('VolumeSelected');
     setSelectedVolumeIds((prevVolumeIds) => {
       const foundVolume = prevVolumeIds.find((volumeId) => {
         return volumeId === volume.id;
@@ -172,6 +191,7 @@ export default function Home() {
           activeVolume={activeVolume ?? undefined}
           onPickVolume={handlePickVolume}
           onSelectedVolume={handleSelectedVolume}
+          onVolumeAction={handleVolumeAction}
         />
       </main>
       <RightPanel
@@ -183,14 +203,12 @@ export default function Home() {
           deleteDialogRef.current?.open();
         }}
       />
-      {volumeForDeletion ? (
-        <ConfirmDialog
-          ref={deleteDialogRef}
-          title="Are you sure you want to delete this volume?"
-          description={`A volume with name "${volumeForDeletion.name}" will be permanently deleted.`}
-          onConfirm={handleConfirmDeleteVolume}
-        />
-      ) : ''}
+      <ConfirmDialog
+        ref={deleteDialogRef}
+        title="Are you sure you want to delete this volume?"
+        description={`A volume with name "${volumeForDeletion?.name ?? ''}" will be permanently deleted.`}
+        onConfirm={handleConfirmDeleteVolume}
+      />
       <Toaster />
     </SidebarProvider>
   );
